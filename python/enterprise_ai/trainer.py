@@ -15,7 +15,6 @@ class ModelTrainer:
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         
-        # Ensure required config parameters are present
         required_params = [
             'model_type', 'learning_rate', 'weight_decay', 'batch_size',
             'num_document_classes', 'num_entity_types', 'time_series_features',
@@ -25,7 +24,6 @@ class ModelTrainer:
             if param not in config:
                 raise ValueError(f"Missing required config parameter: {param}")
         
-        # Forcefully ensure 'document_class' is included in the config
         if 'num_document_classes' not in config or config['num_document_classes'] <= 0:
             raise ValueError("Invalid configuration: 'num_document_classes' must be specified and greater than 0.")
         
@@ -40,7 +38,19 @@ class ModelTrainer:
             weight_decay=config['weight_decay']
         )
         
-        # Initialize wandb for experiment tracking
+        # Implement a learning rate scheduler
+        self.scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            self.optimizer,
+            max_lr=config['learning_rate'],
+            steps_per_epoch=1,
+            epochs=config.get('epochs', 10),
+            pct_start=0.3,
+            anneal_strategy='cos'
+        )
+        
+        # Enable mixed precision training for speed and efficiency
+        self.scaler = torch.cuda.amp.GradScaler() if torch.cuda.is_available() else None
+        
         try:
             wandb.init(
                 project="enterprise-ai",
@@ -52,29 +62,42 @@ class ModelTrainer:
     def train(self, train_data: Dict[str, Any], val_data: Dict[str, Any], epochs: int = 10):
         logger.info(f"Starting training on {self.device}")
         
-        # Convert training data to tensors
         train_tensors = self._prepare_data(train_data)
         val_tensors = self._prepare_data(val_data)
         
+        gradient_accumulation_steps = self.config.get('gradient_accumulation_steps', 1)
+        
         for epoch in range(epochs):
-            # Training phase
             self.model.train()
-            outputs = self.model(train_tensors)
-            loss = self.model._compute_loss(outputs, train_tensors)
+            running_loss = 0
+            for i in tqdm(range(gradient_accumulation_steps), desc=f"Epoch {epoch + 1}/{epochs}"):
+                with torch.cuda.amp.autocast(enabled=self.scaler is not None):
+                    outputs = self.model(train_tensors)
+                    loss = self.model._compute_loss(outputs, train_tensors)
+                    loss = loss / gradient_accumulation_steps
+                
+                if self.scaler:
+                    self.scaler.scale(loss).backward()
+                else:
+                    loss.backward()
+                
+                if (i + 1) % gradient_accumulation_steps == 0:
+                    if self.scaler:
+                        self.scaler.step(self.optimizer)
+                        self.scaler.update()
+                    else:
+                        self.optimizer.step()
+                    
+                    self.optimizer.zero_grad()
+                
+                running_loss += loss.item()
             
-            self.optimizer.zero_grad()
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
-            self.optimizer.step()
+            avg_loss = running_loss / gradient_accumulation_steps
+            logger.info(f"Epoch {epoch + 1}/{epochs}, Loss: {avg_loss:.4f}")
+            wandb.log({'epoch': epoch, 'train_loss': avg_loss})
             
-            # Log metrics
-            logger.info(f"Epoch {epoch + 1}/{epochs}, Loss: {loss.item():.4f}")
-            wandb.log({
-                'epoch': epoch,
-                'train_loss': loss.item()
-            })
+            self.scheduler.step()
             
-            # Validation phase
             with torch.no_grad():
                 self.model.eval()
                 val_outputs = self.model(val_tensors)
@@ -85,10 +108,9 @@ class ModelTrainer:
         logger.info("Training completed")
     
     def _prepare_data(self, data: Dict[str, Any]) -> Dict[str, torch.Tensor]:
-        """Convert input data to tensors"""
         tensors = {}
         if 'text' in data:
-            tensors['text'] = data['text']  # Keep as list for tokenizer
+            tensors['text'] = data['text']
         if 'time_series' in data:
             tensors['time_series'] = torch.tensor(
                 data['time_series'], 
@@ -108,10 +130,11 @@ class ModelTrainer:
         with torch.no_grad():
             for batch in val_loader:
                 batch = {k: v.to(self.device) for k, v in batch.items()}
-                outputs = self.model(batch)
-                loss = self.model._compute_loss(outputs, batch)
-                total_loss += loss.item()
-                
+                with torch.cuda.amp.autocast(enabled=self.scaler is not None):
+                    outputs = self.model(batch)
+                    loss = self.model._compute_loss(outputs, batch)
+                    total_loss += loss.item()
+        
         return total_loss / len(val_loader)
     
     def save_checkpoint(self, path: str):
