@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  enterprise-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./python:/app
+      - model-data:/app/models
+    env_file:
+      - .env
+    environment:
+      - PYTHONPATH=/app
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - RUNPOD_API_KEY=${RUNPOD_API_KEY}
+
+volumes:
+  model-data:

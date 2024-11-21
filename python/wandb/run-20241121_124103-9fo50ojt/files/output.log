@@ -1,0 +1,24 @@
+INFO:enterprise_ai.trainer:Starting training on cpu
+Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.
+INFO:enterprise_ai.trainer:Epoch 1/10, Loss: 1.2189
+INFO:enterprise_ai.trainer:Validation Loss: 0.4762
+INFO:enterprise_ai.trainer:Epoch 2/10, Loss: 0.1989
+INFO:enterprise_ai.trainer:Validation Loss: 0.0004
+INFO:enterprise_ai.trainer:Epoch 3/10, Loss: 0.0004
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 4/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 5/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 6/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 7/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 8/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 9/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Epoch 10/10, Loss: 0.0000
+INFO:enterprise_ai.trainer:Validation Loss: 0.0000
+INFO:enterprise_ai.trainer:Training completed
+[32mINFO[0m:     127.0.0.1:61515 - "[1mPOST /api/train HTTP/1.1[0m" [32m200 OK[0m

@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+python-dotenv
+runpod
+torch
+transformers
+wandb
+tqdm
+numpy
+scikit-learn
+pandas
