@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const analyticsData = [
-  { date: '2024-03-01', efficiency: 85, accuracy: 92, throughput: 78 },
+  { date: '2024-03-01', efficiency: 88, accuracy: 92, throughput: 78 },
   { date: '2024-03-02', efficiency: 87, accuracy: 94, throughput: 82 },
   { date: '2024-03-03', efficiency: 92, accuracy: 95, throughput: 85 },
   { date: '2024-03-04', efficiency: 89, accuracy: 93, throughput: 80 },
