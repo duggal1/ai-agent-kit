@@ -36,7 +36,7 @@ export function AutomationMetrics() {
           {metrics.map((metric) => (
             <div key={metric.name} className="space-y-2">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">{metric.name}</p>
+                <p className="text-sm font-bold ">{metric.name}</p>
                 <span className="text-sm text-muted-foreground">
                   {metric.value}% / {metric.target}%
                 </span>
