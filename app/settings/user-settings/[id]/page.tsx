@@ -262,7 +262,7 @@ export default function AISettingsPage() {
       {workflows.map((workflow, index) => (
         <Card 
           key={workflow.id} 
-          className="bg-gradient-to-br from-green-50 to-teal-100 dark:from-slate-800 dark:to-slate-900"
+          className="bg-gradient-to-br from-green-300 to-emerald-200 dark:from-slate-800 dark:to-slate-900"
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div className="flex items-center space-x-3">
