@@ -184,7 +184,11 @@ const workflows = [
                     <Button variant="outline" size="sm" className="text-indigo-500 hover:bg-indigo-500 hover:text-white">
                       Configure
                     </Button>
+                    <Button variant="outline" size="sm" className="text-indigo-500 hover:bg-indigo-500 hover:text-white">
+                    Configure
+                  </Button>
                   </div>
+                  
                 ))}
               </CardContent>
             </Card>
