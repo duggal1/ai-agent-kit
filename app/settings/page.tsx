@@ -8,10 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import router from 'next/router';
 
 export default function SettingsPage() {
   const handleSave = () => {
     toast.success('Settings saved successfully');
+  };
+
+
+  const handleNavigate = (SettingsId: string) => {
+    router.push(`/settings/user-settings/${SettingsId}`);
   };
 
   return (
@@ -105,6 +111,8 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <Button onClick={handleSave}>Save Preferences</Button>
+                <button className= " max-w-min flex justify-center bg-gradient-to-r from-blue-500 to-pink-500 w-36 mt-8 "onClick={() => handleNavigate('workflow')}>Go to Workflow Settings</button>
+                <button className= " max-w-min flex justify-center bg-gradient-to-r from-purple-500 via-fuchsia-500 to-blue-600 w-36 mt-8 "onClick={() => handleNavigate('ai models')}>Go to AI models Settings</button>
               </CardContent>
             </Card>
           </TabsContent>
