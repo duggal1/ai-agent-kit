@@ -1,7 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, ArrowUpRight, Brain, CheckCircle2, Clock } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Activity, ArrowUpRight, Brain, Clock } from "lucide-react";
 
 const workflows = [
   {
@@ -26,30 +32,36 @@ const workflows = [
 
 export function AIWorkflows() {
   return (
-    <Card>
+    <Card className="rounded-xl bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white shadow-lg">
       <CardHeader>
-        <CardTitle>Active AI Workflows</CardTitle>
-        <CardDescription>Real-time workflow performance and status</CardDescription>
+        <CardTitle className="text-xl font-bold">Active AI Workflows</CardTitle>
+        <CardDescription className="text-sm text-gray-400">
+          Real-time workflow performance and status
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {workflows.map((workflow) => (
             <div
               key={workflow.name}
-              className="flex items-center justify-between space-x-4 rounded-md border p-4"
+              className="group flex items-center justify-between space-x-4 rounded-lg bg-gradient-to-r from-gray-700 to-gray-900 p-4 shadow-lg hover:from-indigo-500 hover:to-purple-600 transition-all duration-300"
             >
               <div className="flex items-center space-x-4">
-                <workflow.icon className="h-6 w-6 text-primary" />
+                <workflow.icon className="h-8 w-8 text-indigo-400 group-hover:text-white" />
                 <div>
-                  <p className="text-sm font-medium">{workflow.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-base font-semibold group-hover:text-white">
+                    {workflow.name}
+                  </p>
+                  <p className="text-sm text-gray-400 group-hover:text-gray-200">
                     {workflow.status}
                   </p>
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{workflow.efficiency}</span>
+                <Clock className="h-5 w-5 text-gray-400 group-hover:text-white" />
+                <span className="text-sm font-medium group-hover:text-white">
+                  {workflow.efficiency}
+                </span>
               </div>
             </div>
           ))}
