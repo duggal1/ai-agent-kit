@@ -86,9 +86,9 @@ const workflows = [
         <Tabs defaultValue="active" className="space-y-8">
           {/* Tabs List */}
           <TabsList className="bg-gradient-to-r from-blue-600 to-purple-400 p-1 rounded-lg shadow-lg">
-            <TabsTrigger value="active" className="text-white">Active Workflows</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-white">Analytics</TabsTrigger>
-            <TabsTrigger value="settings" className="text-white">Settings</TabsTrigger>
+            <TabsTrigger value="active" className="text-white/80">Active Workflows</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-white/80">Analytics</TabsTrigger>
+            <TabsTrigger value="settings" className="text-white/80">Settings</TabsTrigger>
           </TabsList>
 
           {/* Active Workflows */}
