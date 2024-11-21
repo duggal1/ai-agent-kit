@@ -41,7 +41,7 @@ export default function UserSettingsPage() {
           </h2>
           <div className="bg-neutral-700 p-4 rounded-lg">
             <p className="text-neutral-300">
-              Customize your workflow processes and automation
+              Customize your workflow processes and automation🌟
             </p>
           </div>
         </div>
