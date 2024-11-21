@@ -64,7 +64,7 @@ export default function SettingsPage() {
               </TabsTrigger>
               <TabsTrigger 
                 value="api" 
-                className="flex items-center gap-2 rounded-full data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+                className="flex items-center gap-2 rounded-full data-[state=active]:bg-purple-500 data-[state=active]:text-white"
               >
                 <Key className="h-4 w-4" />
                 API Keys
