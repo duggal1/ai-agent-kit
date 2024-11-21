@@ -11,7 +11,7 @@ export default function Home() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Enterprise AI Dashboard</h1>
             <p className="text-muted-foreground">
-              Monitor and manage your AI-powered business processes
+              Monitor and manage your AI-powered business processes🌟
             </p>
           </div>
         </header>
