@@ -46,8 +46,8 @@ export default function SettingsPage() {
     visible: { 
       opacity: 1,
       transition: { 
-        delayChildren: 0.2,
-        staggerChildren: 0.1
+        delayChildren: 0.1,
+        staggerChildren: 0.05
       }
     }
   };
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="bg-neutral-900/50 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                    <Card className="bg-neutral-700/50 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 shadow-2xl">
                       {/* Notifications content similar to previous implementation */}
                     </Card>
                   </motion.div>
