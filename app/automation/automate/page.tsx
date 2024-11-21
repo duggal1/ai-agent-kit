@@ -85,7 +85,7 @@ const workflows = [
 
         <Tabs defaultValue="active" className="space-y-8">
           {/* Tabs List */}
-          <TabsList className="bg-gradient-to-r from-indigo-500 to-purple-500 p-1 rounded-lg shadow-lg">
+          <TabsList className="bg-gradient-to-r from-blue-600 to-purple-400 p-1 rounded-lg shadow-lg">
             <TabsTrigger value="active" className="text-white">Active Workflows</TabsTrigger>
             <TabsTrigger value="analytics" className="text-white">Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="text-white">Settings</TabsTrigger>
