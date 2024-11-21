@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from 'next/navigation'; // Correct import for App Router
 import { DashboardShell } from '@/components/dashboard/shell';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -16,9 +17,10 @@ import {
   Workflow as WorkflowIcon, 
   Brain 
 } from 'lucide-react';
-import router from 'next/router';
 
 export default function SettingsPage() {
+  const router = useRouter(); // Use useRouter from next/navigation
+
   const handleSave = () => {
     toast.success('Settings saved successfully', {
       description: 'Your changes have been applied.',
@@ -29,6 +31,7 @@ export default function SettingsPage() {
   const handleNavigate = (settingsType: string) => {
     router.push(`/settings/user-settings/${settingsType}`);
   };
+
 
   return (
     <DashboardShell>
