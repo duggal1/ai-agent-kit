@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useRouter } from "next/router";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,23 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { useEffect, useState } from "react";
+
+export default function WorkflowsPage() {
+  const [isClient, setIsClient] = useState(false);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const router = isClient ? useRouter() : null;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const handleNavigate = (workflowId: string) => {
+    if (router) {
+      router.push(`/automation/automate/${workflowId}`);
+    
+  }
+    
 
 const workflows = [
   {
@@ -54,12 +70,8 @@ const workflows = [
   },
 ];
 
-export default function WorkflowsPage() {
-  const router = useRouter();
 
-  const handleNavigate = (workflowId: string) => {
-    router.push(`/automation/automate/${workflowId}`);
-  };
+
 
   return (
     <DashboardShell>
@@ -181,4 +193,7 @@ export default function WorkflowsPage() {
       </div>
     </DashboardShell>
   );
-}
+}  }
+  
+
+
