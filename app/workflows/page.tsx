@@ -59,30 +59,59 @@ export default function WorkflowsPage() {
           targetMetrics: ['efficiency', 'accuracy']
         }
       });
+      toast.success(`Workflow ${workflowId} optimized successfully!`);
     } catch (error) {
+      toast.error('Optimization failed. Please try again.');
       console.error('Optimization error:', error);
     }
   };
 
   return (
     <DashboardShell>
-      <div className="flex flex-col gap-8 p-8">
-        <header>
-          <h1 className=" font-bold tracking-tight  text-transparent  text-5xl bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">AI Workflows</h1>
-          <p className="text-gray-400">
-            Manage and monitor your automated business processes
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 to-slate-950 text-white p-6 lg:p-12">
+        <motion.header 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-12"
+        >
+          <h1 className="text-4xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600 mb-4">
+            Workflow Intelligence
+          </h1>
+          <p className="text-neutral-400 max-w-2xl">
+            Intelligent automation that transforms your business processes with precision and adaptability.
           </p>
-        </header>
+        </motion.header>
 
-        <Tabs defaultValue="active" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="active">Active Workflows</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+        <Tabs defaultValue="active" className="space-y-6">
+          <TabsList className="bg-neutral-900 border border-neutral-800 p-1 rounded-xl">
+            <TabsTrigger 
+              value="active" 
+              className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 rounded-lg transition-all"
+            >
+              Active Workflows
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics" 
+              className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 rounded-lg transition-all"
+            >
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400 rounded-lg transition-all"
+            >
+              Settings
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="active" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <TabsContent value="active" className="space-y-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ staggerChildren: 0.1 }}
+              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
               {workflows.map((workflow) => (
                 <motion.div
                   key={workflow.id}
@@ -90,43 +119,53 @@ export default function WorkflowsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Card className="overflow-hidden">
-                    <CardHeader className="space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <workflow.icon className="h-5 w-5 text-primary" />
-                        <CardTitle>{workflow.name}</CardTitle>
+                  <Card className="bg-neutral-900 border border-neutral-800 hover:border-blue-600/50 transition-all duration-300 group">
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <workflow.icon className="h-6 w-6 text-blue-400 group-hover:text-blue-300 transition-colors" />
+                          <CardTitle className="text-xl text-neutral-200">{workflow.name}</CardTitle>
+                        </div>
+                        <span className="text-xs px-2 py-1 bg-blue-900/30 text-blue-300 rounded-full">
+                          {workflow.status}
+                        </span>
                       </div>
-                      <CardDescription>{workflow.description}</CardDescription>
+                      <CardDescription className="text-neutral-500 pt-2">
+                        {workflow.description}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-muted-foreground">Efficiency</span>
-                            <span className="text-sm font-medium">{workflow.metrics.efficiency}%</span>
+                          <div className="flex items-center justify-between text-neutral-400">
+                            <span className="text-sm">Efficiency</span>
+                            <span className="text-sm font-medium text-blue-300">
+                              {workflow.metrics.efficiency}%
+                            </span>
                           </div>
-                          <Progress value={workflow.metrics.efficiency} className="h-2" />
+                          <Progress 
+                            value={workflow.metrics.efficiency} 
+                            className="h-2 bg-neutral-800" 
+                            indicatorClassName="bg-blue-600"
+                          />
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-muted-foreground">Status</p>
-                            <p className="font-medium">{workflow.status}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Type</p>
-                            <p className="font-medium">{workflow.type}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Last Run</p>
-                            <p className="font-medium">{workflow.lastRun}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Next Run</p>
-                            <p className="font-medium">{workflow.nextRun}</p>
-                          </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm text-neutral-400">
+                          {[
+                            { label: 'Type', value: workflow.type },
+                            { label: 'Last Run', value: workflow.lastRun },
+                            { label: 'Next Run', value: workflow.nextRun }
+                          ].map(({ label, value }) => (
+                            <div key={label}>
+                              <p className="text-xs uppercase tracking-wider mb-1">{label}</p>
+                              <p className="font-medium text-neutral-200">{value}</p>
+                            </div>
+                          ))}
                         </div>
+                        
                         <Button 
-                          className="w-full"
+                          variant="outline"
+                          className="w-full bg-neutral-800 border-neutral-700 hover:bg-blue-900/30 text-blue-300 hover:text-blue-200 transition-all"
                           onClick={() => handleOptimize(workflow.id)}
                           disabled={isOptimizing}
                         >
@@ -137,31 +176,42 @@ export default function WorkflowsPage() {
                   </Card>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </TabsContent>
 
-          <TabsContent  value="analytics">
+          <TabsContent value="analytics" className="bg-neutral-900 rounded-xl border border-neutral-800">
             <WorkflowAnalytics />
           </TabsContent>
 
           <TabsContent value="settings">
-            <Card>
+            <Card className="bg-neutral-900 border border-neutral-800">
               <CardHeader>
-                <CardTitle className=' text-transparent  text-3xl bg-clip-text bg-gradient-to-r from-blue-500 to-violet-600'>Workflow Settings</CardTitle>
-                <CardDescription>Configure global workflow parameters</CardDescription>
+                <CardTitle className="text-3xl bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
+                  Workflow Settings
+                </CardTitle>
+                <CardDescription className="text-neutral-500">
+                  Configure global workflow parameters and optimization strategies
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {workflows.map((workflow) => (
-                    <div key={workflow.id} className="flex items-center justify-between border pb-4">
-                      <div className="flex items-center space-x-2">
-                        <workflow.icon className="h-4 w-4 text-muted-foreground" />
+                    <div 
+                      key={workflow.id} 
+                      className="flex items-center justify-between border-b border-neutral-800 pb-4 last:border-b-0 hover:bg-neutral-800/50 transition-all p-3 rounded-lg"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <workflow.icon className="h-5 w-5 text-blue-400" />
                         <div>
-                          <p className="font-bold text-gray-100">{workflow.name}</p>
-                          <p className="text-sm text-neutral-100">{workflow.type}</p>
+                          <p className="font-semibold text-neutral-200">{workflow.name}</p>
+                          <p className="text-sm text-neutral-500">{workflow.type}</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="bg-neutral-800 border-neutral-700 text-blue-300 hover:bg-blue-900/30"
+                      >
                         Configure
                       </Button>
                     </div>
