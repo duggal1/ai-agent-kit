@@ -113,7 +113,7 @@ export function ModelTraining() {
         {/* Action Button */}
         <Button
           onClick={handleStartTraining}
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:opacity-90 text-white"
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-500 hover:opacity-90 text-white"
         >
           Start Training
         </Button>
