@@ -68,8 +68,8 @@ export default function WorkflowsPage() {
     <DashboardShell>
       <div className="flex flex-col gap-8 p-8">
         <header>
-          <h1 className="text-3xl font-bold tracking-tight">AI Workflows</h1>
-          <p className="text-muted-foreground">
+          <h1 className=" font-bold tracking-tight  text-transparent  text-5xl bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500">AI Workflows</h1>
+          <p className="text-gray-400">
             Manage and monitor your automated business processes
           </p>
         </header>
@@ -140,25 +140,25 @@ export default function WorkflowsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="analytics">
+          <TabsContent  value="analytics">
             <WorkflowAnalytics />
           </TabsContent>
 
           <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>Workflow Settings</CardTitle>
+                <CardTitle className=' text-transparent  text-3xl bg-clip-text bg-gradient-to-r from-blue-500 to-violet-600'>Workflow Settings</CardTitle>
                 <CardDescription>Configure global workflow parameters</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {workflows.map((workflow) => (
-                    <div key={workflow.id} className="flex items-center justify-between border-b pb-4">
+                    <div key={workflow.id} className="flex items-center justify-between border pb-4">
                       <div className="flex items-center space-x-2">
                         <workflow.icon className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <p className="font-medium">{workflow.name}</p>
-                          <p className="text-sm text-muted-foreground">{workflow.type}</p>
+                          <p className="font-bold text-gray-100">{workflow.name}</p>
+                          <p className="text-sm text-neutral-100">{workflow.type}</p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm">
