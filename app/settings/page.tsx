@@ -111,10 +111,23 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <Button onClick={handleSave}>Save Preferences</Button>
-                <button className= " max-w-min flex justify-center bg-gradient-to-r from-blue-500 to-pink-500 w-36 mt-8 "onClick={() => handleNavigate('workflow')}>Go to Workflow Settings</button>
-                <button className= " max-w-min flex justify-center bg-gradient-to-r from-purple-500 via-fuchsia-500 to-blue-600 w-36 mt-8 "onClick={() => handleNavigate('ai models')}>Go to AI models Settings</button>
+                <button 
+  onClick={() => handleNavigate('workflow')} 
+  className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-700 text-white font-bold py-2 px-8 rounded-lg shadow-lg hover:bg-gradient-to-l hover:from-indigo-700 hover:via-pink-500 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
+>
+  Go to Workflow Settings
+</button>
+
+<button 
+  onClick={() => handleNavigate('ai models')} 
+  className="max-w-min flex justify-center bg-gradient-to-r from-purple-600 via-fuchsia-500 to-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg mt-8 hover:bg-gradient-to-l hover:from-blue-600 hover:via-fuchsia-500 hover:to-purple-600 transition-all duration-300 transform hover:scale-105"
+>
+  Go to AI Models Settings
+</button>
+                
               </CardContent>
             </Card>
+           
           </TabsContent>
         </Tabs>
       </div>
