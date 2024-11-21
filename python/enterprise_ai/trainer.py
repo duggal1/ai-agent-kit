@@ -145,7 +145,7 @@ class ModelTrainer:
         }
         torch.save(checkpoint, path)
         logger.info(f"Saved checkpoint to {path}")
-        
+        # learning Rate Scheduling: Added OneCycleLR scheduler for dynamic learning rate adjustment, which is effective for stable training for a long time 
     def load_checkpoint(self, path: str):
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint['model_state'])
