@@ -35,55 +35,61 @@ export function MainNav() {
   ];
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-4xl bg-black/60 backdrop-blur-xl rounded-full shadow-2xl border border-white/10">
-      <div className="flex items-center justify-between px-4 py-2">
-        <Link 
-          href="/" 
-          className="hidden items-center space-x-2 md:flex group"
-        >
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: 360 }}
-            transition={{ duration: 0.5 }}
+    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-3rem)] max-w-5xl">
+      <div className="bg-gradient-to-br from-neutral-900/80 to-neutral-800/80 backdrop-blur-2xl rounded-full border border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between px-2 py-2">
+          {/* Logo Section */}
+          <Link
+            href="/"
+            className="hidden items-center space-x-3 md:flex group"
           >
-            <Brain 
-              className="h-6 w-6 text-white group-hover:text-blue-400 transition-colors" 
-            />
-          </motion.div>
-          <span className="hidden font-bold sm:inline-block text-white/80 group-hover:text-white transition-colors">
-            Enterprise AI
-          </span>
-        </Link>
-        
-        <div className="flex items-center space-x-4">
-          {routes.map((route) => (
             <motion.div
-              key={route.href}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ 
+                scale: 1.1, 
+                rotate: 360,
+                transition: { duration: 0.6, type: "spring" }
+              }}
             >
-              <Link
-                href={route.href}
-                className={cn(
-                  "flex items-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group",
-                  route.active 
-                    ? "text-white bg-blue-600/20 px-3 py-1 rounded-full" 
-                    : "text-white/60 hover:text-white hover:bg-white/10 px-3 py-1 rounded-full"
-                )}
-              >
-                <route.icon 
-                  className={cn(
-                    "h-4 w-4 transition-colors",
-                    route.active 
-                      ? "text-blue-400" 
-                      : "text-white/60 group-hover:text-blue-400"
-                  )} 
-                />
-                <span className="hidden md:block">
-                  {route.label}
-                </span>
-              </Link>
+              <Brain className="h-7 w-7 text-white/80 group-hover:text-blue-400 transition-all duration-300" />
             </motion.div>
-          ))}
+            <span className="font-light tracking-wider text-white/70 group-hover:text-white transition-colors duration-300">
+              Enterprise AI
+            </span>
+          </Link>
+
+          {/* Navigation Links */}
+          <div className="flex items-center space-x-1 w-full justify-center">
+            {routes.map((route) => (
+              <motion.div
+                key={route.href}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex-grow flex justify-center"
+              >
+                <Link
+                  href={route.href}
+                  className={cn(
+                    "flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-in-out group px-4 py-2 rounded-full",
+                    route.active
+                      ? "text-white bg-blue-500/20 ring-2 ring-blue-500/30"
+                      : "text-white/60 hover:text-white hover:bg-white/10"
+                  )}
+                >
+                  <route.icon
+                    className={cn(
+                      "h-5 w-5 transition-colors",
+                      route.active
+                        ? "text-blue-400"
+                        : "text-white/60 group-hover:text-blue-400"
+                    )}
+                  />
+                  <span className="hidden md:block">{route.label}</span>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </nav>

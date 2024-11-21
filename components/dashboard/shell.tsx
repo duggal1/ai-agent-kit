@@ -1,5 +1,5 @@
 import { MainNav } from '@/components/dashboard/main-nav';
-import { Search } from '@/components/dashboard/search';
+
 import { UserNav } from '@/components/dashboard/user-nav';
 import { ModeToggle } from '@/components/mode-toggle';
 
@@ -10,7 +10,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <div className="container flex h-16 items-center justify-between py-4">
           <MainNav />
           <div className="flex items-center gap-4">
-            <Search />
+   
             <ModeToggle />
             <UserNav />
           </div>
