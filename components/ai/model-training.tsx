@@ -124,7 +124,7 @@ export function ModelTraining() {
             {progress === 100 ? (
               <CheckCircle className="h-5 w-5 text-green-500" />
             ) : progress > 0 ? (
-              <Info className="h-5 w-5 text-blue-500" />
+              <Info className="h-5 w-5 text-blue-800" />
             ) : (
               <AlertCircle className="h-5 w-5 text-red-500" />
             )}
