@@ -63,7 +63,7 @@ export function UserNav() {
           </DropdownMenuItem>
           <DropdownMenuItem className="hover:bg-white/10 focus:bg-white/20 cursor-pointer group">
             <Settings className="mr-3 h-5 w-5 text-white/60 group-hover:text-blue-400 transition-colors" />
-            <span className="text-white/90 group-hover:text-white transition-colors">Settings</span>
+            <span className="text-white group-hover:text-white transition-colors">Settings</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 
