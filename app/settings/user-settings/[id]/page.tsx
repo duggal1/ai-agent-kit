@@ -39,6 +39,9 @@ import {
 import { useModelTraining } from '@/hooks/use-model-training';
 import { useWorkflowOptimization } from '@/hooks/use-workflow-optimization';
 import { toast } from 'sonner';
+import { useParams } from 'next/navigation';
+const { id } = useParams();
+
 
 const models = [
   {
@@ -351,7 +354,7 @@ export default function AISettingsPage() {
   );
 
   const renderGlobalSettings = () => (
-    <Card className="bg-gradient-to-br from-purple-50 to-pink-100 dark:from-slate-800 dark:to-slate-900">
+    <Card className="bg-gradient-to-br from-purple-300 to-pink-200 dark:from-slate-800 dark:to-slate-900">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="w-5 h-5" /> Global AI Configuration
@@ -395,5 +398,7 @@ export default function AISettingsPage() {
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
+
+  
