@@ -83,11 +83,11 @@ export default function WorkflowsPage() {
           transition={{ duration: 0.5 }}
           className="relative z-10 mb-12"
         >
-          <h1 className="text-4xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-blue-500 mb-4 tracking-tight">
+          <h1 className="text-4xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-blue-600 mb-4 tracking-tight">
             Workflow Intelligence
           </h1>
           <p className="text-neutral-400 max-w-2xl text-lg leading-relaxed">
-            Precision-driven automation that transforms complex business processes into seamless, intelligent workflows.
+            Precision-driven automation that transforms complex business processes into seamless, intelligent workflows🌟.
           </p>
         </motion.header>
 
