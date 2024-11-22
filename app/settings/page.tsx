@@ -82,7 +82,7 @@ export default function SettingsPage() {
               Enterprise AI Settings
             </h1>
             <p className="text-neutral-300 max-w-2xl mx-auto text-lg">
-              Powerful configuration tools to customize and optimize your AI ecosystem
+              Powerful configuration tools to customize and optimize your AI ecosystem⚡️
             </p>
           </motion.header>
 
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                           <Label className="text-white/80">Company Name</Label>
                           <Input 
                             placeholder="Enter company name" 
-                            className="bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-blue-500/50"
+                            className="bg-white/10 border-white/20 text-white focus:ring-2 focus:ring-blue-500"
                           />
                         </motion.div>
                         <motion.div variants={itemVariants} className="space-y-2">
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                           <Button 
                             onClick={handleSave}
                             disabled={isSaving}
-                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 relative"
+                            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-800 transition-all duration-300 relative"
                           >
                             {isSaving ? (
                               <motion.div
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                     exit={{ opacity: 0, y: -18 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="bg-neutral-700/50 backdrop-blur-3xl border border-blue-700/10 rounded-3xl p-8 shadow-2xl">
+                    <Card className="bg-neutral-700/50 backdrop-blur-3xl border border-blue-800 rounded-3xl p-8 shadow-2xl">
                       {/* Notifications content similar to previous implementation */}
                     </Card>
                   </motion.div>
