@@ -3,7 +3,7 @@ export const RUNPOD_ENDPOINTS = {
   workflowOptimizer: process.env.RUNPOD_WORKFLOW_ENDPOINT_ID || '',
   customerIntelligence: process.env.RUNPOD_CUSTOMER_ENDPOINT_ID || '',
   supplyChainOptimizer: process.env.RUNPOD_SUPPLY_CHAIN_ENDPOINT_ID || '',
-};
+}; // TODO: Add test endpoint
 
 export const RUNPOD_MODELS = {
   documentProcessor: {

@@ -1,0 +1,39 @@
+{
+  "os":  "macOS-15.2-arm64-arm-64bit",
+  "python":  "3.12.1",
+  "startedAt":  "2024-11-21T17:03:24.747003Z",
+  "program":  "/Users/harshitduggal/Downloads/ai-agent-kit-3/python/server.py",
+  "codePath":  "python/server.py",
+  "git":  {
+    "remote":  "https://github.com/duggal1/ai-agent-kit",
+    "commit":  "430fe49f73ce0c00742bd345acd1c28c45801e0c"
+  },
+  "email":  "theofficialsynex@gmail.com",
+  "root":  "/Users/harshitduggal/Downloads/ai-agent-kit-3/python",
+  "host":  "harshits-MacBook-Air.local",
+  "username":  "harshitduggal",
+  "executable":  "/Users/harshitduggal/.pyenv/versions/3.12.1/bin/python",
+  "codePathLocal":  "server.py",
+  "cpu_count":  8,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "245107195904",
+      "used":  "229208752128"
+    }
+  },
+  "memory":  {
+    "total":  "8589934592"
+  },
+  "cpu":  {
+    "count":  8,
+    "countLogical":  8
+  },
+  "apple":  {
+    "name":  "Apple M1",
+    "ecpuCores":  4,
+    "pcpuCores":  4,
+    "gpuCores":  7,
+    "memoryGb":  8
+  }
+}

@@ -1,0 +1,9 @@
+INFO:enterprise_ai.trainer:Starting training process...
+Epoch 1/10:   0%|                                                         | 0/1 [00:00<?, ?it/s]Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.
+Epoch 1/10:   0%|                                                         | 0/1 [00:00<?, ?it/s]
+ERROR:server:Training error: 'int' object has no attribute 'backward'
+[32mINFO[0m:     127.0.0.1:52521 - "[1mPOST /api/train HTTP/1.1[0m" [32m200 OK[0m
+[32mINFO[0m:     Shutting down
+[32mINFO[0m:     Waiting for application shutdown.
+[32mINFO[0m:     Application shutdown complete.
+[32mINFO[0m:     Finished server process [[36m10889[0m]
