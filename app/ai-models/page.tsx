@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { useModelTraining } from '@/hooks/use-model-training';
 import { ModelTraining } from '@/components/ai/model-training';
 import { PerformanceMonitor } from '@/components/ai/performance-monitor';
-
+//TODOD :UPDATED AND ADD MORE MODEL CONFIG
 const models = [
   {
     id: 'document_processor',
