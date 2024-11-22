@@ -202,10 +202,10 @@ export default function SettingsPage() {
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
+                    exit={{ opacity: 0, y: -18 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <Card className="bg-neutral-700/50 backdrop-blur-3xl border border-white/10 rounded-3xl p-8 shadow-2xl">
+                    <Card className="bg-neutral-700/50 backdrop-blur-3xl border border-blue-700/10 rounded-3xl p-8 shadow-2xl">
                       {/* Notifications content similar to previous implementation */}
                     </Card>
                   </motion.div>
