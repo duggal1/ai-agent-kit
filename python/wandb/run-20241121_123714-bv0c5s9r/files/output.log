@@ -1,8 +1,0 @@
-INFO:enterprise_ai.trainer:Starting training on cpu
-Asking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.
-ERROR:server:Training error: 'document_class'
-[32mINFO[0m:     127.0.0.1:61393 - "[1mPOST /api/train HTTP/1.1[0m" [91m500 Internal Server Error[0m
-[32mINFO[0m:     Shutting down
-[32mINFO[0m:     Waiting for application shutdown.
-[32mINFO[0m:     Application shutdown complete.
-[32mINFO[0m:     Finished server process [[36m24039[0m]

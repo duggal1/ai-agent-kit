@@ -1,9 +1,0 @@
-{"time":"2024-11-21T23:45:04.001247+05:30","level":"INFO","msg":"using version","core version":"0.18.7"}
-{"time":"2024-11-21T23:45:04.001301+05:30","level":"INFO","msg":"created symlink","path":"/Users/harshitduggal/Downloads/ai-agent-kit-3/python/wandb/run-20241121_234503-lm4w5x7j/logs/debug-core.log"}
-{"time":"2024-11-21T23:45:04.128676+05:30","level":"INFO","msg":"created new stream","id":"lm4w5x7j"}
-{"time":"2024-11-21T23:45:04.130142+05:30","level":"INFO","msg":"stream: started","id":"lm4w5x7j"}
-{"time":"2024-11-21T23:45:04.131839+05:30","level":"INFO","msg":"handler: started","stream_id":"lm4w5x7j"}
-{"time":"2024-11-21T23:45:04.133488+05:30","level":"INFO","msg":"sender: started","stream_id":"lm4w5x7j"}
-{"time":"2024-11-21T23:45:04.133523+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"lm4w5x7j"}
-{"time":"2024-11-21T23:45:04.606297+05:30","level":"INFO","msg":"Starting system monitor"}
-{"time":"2024-11-21T23:46:21.660614+05:30","level":"ERROR","msg":"runconsolelogs: failed to write to file: truncate /Users/harshitduggal/Downloads/ai-agent-kit-3/python/wandb/run-20241121_234503-lm4w5x7j/files/output.log: no space left on device"}

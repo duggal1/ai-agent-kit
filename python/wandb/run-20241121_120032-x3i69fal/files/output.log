@@ -1,2 +1,0 @@
-server.py           :69   2024-11-21 12:00:33,624 Training error: 404 Client Error: Not Found for url: https://api.runpod.ai/v2/enterprise-ai-training/run
-[32mINFO[0m:     127.0.0.1:60114 - "[1mPOST /api/train HTTP/1.1[0m" [91m500 Internal Server Error[0m

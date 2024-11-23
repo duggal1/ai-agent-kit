@@ -1,8 +1,0 @@
-{"time":"2024-11-21T12:00:32.564046+05:30","level":"INFO","msg":"using version","core version":"0.18.7"}
-{"time":"2024-11-21T12:00:32.564157+05:30","level":"INFO","msg":"created symlink","path":"/Users/harshitduggal/Downloads/AI-AGENT-KIT-2/python/wandb/run-20241121_120032-x3i69fal/logs/debug-core.log"}
-{"time":"2024-11-21T12:00:32.683414+05:30","level":"INFO","msg":"created new stream","id":"x3i69fal"}
-{"time":"2024-11-21T12:00:32.683569+05:30","level":"INFO","msg":"stream: started","id":"x3i69fal"}
-{"time":"2024-11-21T12:00:32.684047+05:30","level":"INFO","msg":"handler: started","stream_id":"x3i69fal"}
-{"time":"2024-11-21T12:00:32.684124+05:30","level":"INFO","msg":"sender: started","stream_id":"x3i69fal"}
-{"time":"2024-11-21T12:00:32.684138+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"x3i69fal"}
-{"time":"2024-11-21T12:00:33.161235+05:30","level":"INFO","msg":"Starting system monitor"}

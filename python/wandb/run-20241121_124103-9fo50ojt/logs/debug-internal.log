@@ -1,8 +1,0 @@
-{"time":"2024-11-21T12:41:03.029429+05:30","level":"INFO","msg":"using version","core version":"0.18.7"}
-{"time":"2024-11-21T12:41:03.029487+05:30","level":"INFO","msg":"created symlink","path":"/Users/harshitduggal/Downloads/AI-AGENT-KIT-2/python/wandb/run-20241121_124103-9fo50ojt/logs/debug-core.log"}
-{"time":"2024-11-21T12:41:03.145467+05:30","level":"INFO","msg":"created new stream","id":"9fo50ojt"}
-{"time":"2024-11-21T12:41:03.145689+05:30","level":"INFO","msg":"stream: started","id":"9fo50ojt"}
-{"time":"2024-11-21T12:41:03.145869+05:30","level":"INFO","msg":"handler: started","stream_id":"9fo50ojt"}
-{"time":"2024-11-21T12:41:03.146033+05:30","level":"INFO","msg":"sender: started","stream_id":"9fo50ojt"}
-{"time":"2024-11-21T12:41:03.146038+05:30","level":"INFO","msg":"writer: Do: started","stream_id":"9fo50ojt"}
-{"time":"2024-11-21T12:41:03.630618+05:30","level":"INFO","msg":"Starting system monitor"}

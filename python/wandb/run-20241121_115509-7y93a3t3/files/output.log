@@ -1,6 +1,0 @@
-server.py           :69   2024-11-21 11:55:11,294 Training error: 404 Client Error: Not Found for url: https://api.runpod.ai/v2/enterprise-ai-training/run
-[32mINFO[0m:     127.0.0.1:59972 - "[1mPOST /api/train HTTP/1.1[0m" [91m500 Internal Server Error[0m
-[32mINFO[0m:     Shutting down
-[32mINFO[0m:     Waiting for application shutdown.
-[32mINFO[0m:     Application shutdown complete.
-[32mINFO[0m:     Finished server process [[36m10417[0m]

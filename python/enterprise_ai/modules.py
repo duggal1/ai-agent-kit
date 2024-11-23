@@ -1,24 +1,30 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import List
+from typing import Dict, List
+
+# Define and export DOMAIN_PATTERNS
+DOMAIN_PATTERNS: Dict[str, List[str]] = {
+    'technical': ['api', 'endpoint', 'service', 'database', 'cloud', 'server', 'latency', 'performance'],
+    'financial': ['revenue', 'cost', 'profit', 'loss', 'margin', 'budget', 'forecast', 'growth'],
+    'security': ['vulnerability', 'threat', 'encryption', 'firewall', 'breach', 'incident', 'risk'],
+    'metadata': ['version', 'timestamp', 'author', 'classification', 'status', 'category'],
+    'legal': ['compliance', 'regulation', 'policy', 'contract', 'agreement', 'terms', 'liability'],
+    'medical': ['diagnosis', 'treatment', 'patient', 'clinical', 'medical', 'healthcare', 'prescription']
+}
 
 __all__ = [
+    'DocumentClassifier',
+    'FinancialClassifier',
+    'HybridClassifier',
     'DocumentAnalyzer',
     'EntityRecognizer',
     'SemanticAnalyzer',
-    'DocumentClassifier',
-    'FinancialClassifier',
-    'HybridClassifier'
+    'DomainAdapter',
+    'MultiScaleFeatureFusion',
+    'ConfidenceCalibration',
+    'DOMAIN_PATTERNS'  # Add DOMAIN_PATTERNS to __all__
 ]
-
-# Add missing pattern recognition and domain patterns
-DOMAIN_PATTERNS = {
-    'technical': ['api', 'endpoint', 'service', 'database', 'cloud', 'server'],
-    'financial': ['revenue', 'cost', 'profit', 'loss', 'margin', 'budget', 'forecast'],
-    'security': ['vulnerability', 'threat', 'encryption', 'firewall', 'breach'],
-    'metadata': ['version', 'timestamp', 'author', 'classification', 'status']
-}
 
 class DocumentAnalyzer(nn.Module):
     def __init__(self, config):
@@ -92,39 +98,33 @@ class DocumentAnalyzer(nn.Module):
         )
         
     def forward(self, x):
-        # Multi-scale transformer processing
-        transformer_outputs = []
-        current = x
-        for layer in self.transformer_layers:
-            current = layer(current)
-            transformer_outputs.append(current)
+        # Ensure input is 2D [batch_size, hidden_size]
+        if len(x.shape) == 3:
+            x = x.mean(dim=1)  # Average over sequence length
+        elif len(x.shape) == 1:
+            x = x.unsqueeze(0)  # Add batch dimension
         
-        # Multi-scale attention fusion
+        # Process through analyzers
+        financial_features = self.financial_analyzer(x)
+        structure_features = self.structure_analyzer(x)
+        
+        # Multi-scale attention
+        x_3d = x.unsqueeze(1)  # [batch_size, 1, hidden_size]
         attention_outputs = []
-        for attention_layer in self.attention_scales:
-            attn_out, _ = attention_layer(current, current, current)
-            attention_outputs.append(attn_out)
+        for attention in self.attention_scales:
+            attn_out, _ = attention(x_3d, x_3d, x_3d)
+            attention_outputs.append(attn_out.squeeze(1))
         
-        # Combine attention scales
-        multi_scale_output = torch.stack(attention_outputs).mean(dim=0)
-        
-        # Enhanced feature extraction
-        financial_features = self.financial_analyzer(multi_scale_output)
-        structure_features = self.structure_analyzer(multi_scale_output)
-        
-        # Advanced feature fusion
+        # Combine features
         combined = torch.cat([
-            multi_scale_output,
             financial_features,
-            structure_features
+            structure_features,
+            *attention_outputs
         ], dim=-1)
         
-        # Apply feature fusion with residual connection
-        fused = self.feature_fusion(combined)
-        
-        # Confidence boosting
-        boosted = self.confidence_booster(fused)
-        output = fused + boosted  # Residual connection
+        # Final processing
+        output = self.feature_fusion(combined)
+        output = self.confidence_booster(output)
         
         return output
 
@@ -198,18 +198,43 @@ class SemanticAnalyzer(nn.Module):
         super().__init__()
         hidden_size = config.get('embedding_dim', 1024)
         
-        # Simplified architecture with forced output size
         self.projection = nn.Sequential(
             nn.Linear(hidden_size, hidden_size),
             nn.LayerNorm(hidden_size),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size)  # Force output size
+            nn.Linear(hidden_size, hidden_size)
         )
+        
+        self.attention = nn.MultiheadAttention(
+            embed_dim=hidden_size,
+            num_heads=8,
+            dropout=0.1,
+            batch_first=True
+        )
+        
+        # Add dimension handling layers
+        self.input_norm = nn.LayerNorm(hidden_size)
+        self.output_norm = nn.LayerNorm(hidden_size)
     
     def forward(self, x):
-        # Force mean pooling and ensure output size
-        pooled = torch.mean(x, dim=1)  # [batch_size, hidden_size]
-        return self.projection(pooled)  # Guaranteed [batch_size, hidden_size]
+        # Ensure input is 3D [batch_size, seq_len, hidden_size]
+        if len(x.shape) == 2:
+            x = x.unsqueeze(1)
+        elif len(x.shape) == 1:
+            x = x.unsqueeze(0).unsqueeze(0)
+            
+        # Normalize input
+        x = self.input_norm(x)
+        
+        # Apply attention
+        attn_output, _ = self.attention(x, x, x)
+        
+        # Project features
+        projected = self.projection(attn_output)
+        
+        # Normalize and mean pool
+        output = self.output_norm(projected)
+        return output.mean(dim=1)  # Return [batch_size, hidden_size]
 
 class DocumentClassifier(nn.Module):
     def __init__(self, hidden_size: int, num_classes: int):
@@ -279,6 +304,10 @@ class DomainAdapter(nn.Module):
         super().__init__()
         self.domain = domain
         
+        # Verify domain exists
+        if domain not in DOMAIN_PATTERNS:
+            raise ValueError(f"Invalid domain: {domain}. Available domains: {list(DOMAIN_PATTERNS.keys())}")
+        
         self.adapter = nn.Sequential(
             nn.Linear(hidden_size, hidden_size * 4),
             nn.LayerNorm(hidden_size * 4),
@@ -295,20 +324,57 @@ class DomainAdapter(nn.Module):
         )
 
 class MultiScaleFeatureFusion(nn.Module):
-    def __init__(self, hidden_size: int, num_scales: int, num_heads: List[int]):
+    def __init__(self, input_size: int, output_size: int, num_heads: int):
         super().__init__()
-        self.scales = nn.ModuleList([
-            ScaleProcessor(
-                hidden_size=hidden_size,
-                num_heads=heads,
-                scale_factor=2**i
-            ) for i, heads in enumerate(num_heads)
-        ])
+        self.input_size = input_size
+        self.output_size = output_size
+        self.num_heads = num_heads
         
-        self.fusion = CrossScaleAttention(
-            hidden_size=hidden_size,
-            num_scales=num_scales
+        # Adjust projection dimensions
+        self.input_projection = nn.Linear(input_size, output_size)
+        self.input_norm = nn.LayerNorm(output_size)
+        
+        # Feature projection with corrected dimensions
+        self.projection = nn.Sequential(
+            nn.Linear(output_size, output_size * 2),
+            nn.LayerNorm(output_size * 2),
+            nn.GELU(),
+            nn.Dropout(0.1),
+            nn.Linear(output_size * 2, output_size)
         )
+        
+        # Add attention layer with correct dimensions
+        self.attention = nn.MultiheadAttention(
+            embed_dim=output_size,
+            num_heads=num_heads,
+            dropout=0.1,
+            batch_first=True
+        )
+    
+    def forward(self, x):
+        # Ensure input is 2D [batch_size, hidden_size]
+        if len(x.shape) == 3:
+            x = x.mean(dim=1)
+        elif len(x.shape) == 1:
+            x = x.unsqueeze(0)
+        
+        # Project input to correct dimension
+        x = self.input_projection(x)
+        x = self.input_norm(x)
+        
+        # Add sequence dimension for attention
+        x_3d = x.unsqueeze(1)  # [batch_size, 1, output_size]
+        
+        # Apply self-attention
+        attn_out, _ = self.attention(x_3d, x_3d, x_3d)
+        
+        # Remove sequence dimension
+        x = attn_out.squeeze(1)
+        
+        # Final projection
+        output = self.projection(x)
+        
+        return output  # [batch_size, output_size]
 
 class EnhancedEntityRecognizer(nn.Module):
     def __init__(self, config):
@@ -497,3 +563,66 @@ class PatternMatcher(nn.Module):
         )
         
         return combined_scores
+
+class ConfidenceCalibration(nn.Module):
+    """Module for calibrating confidence scores of model predictions."""
+    def __init__(self, input_size: int = None, num_bins: int = 15, temperature: float = 1.0):
+        super().__init__()
+        self.temperature = nn.Parameter(torch.ones(1) * temperature)
+        self.num_bins = num_bins
+        
+        # Handle both hidden_size and input_size for backward compatibility
+        self.input_size = input_size
+        
+        if input_size is not None:
+            # Calibration network
+            self.calibration_network = nn.Sequential(
+                nn.Linear(input_size, input_size // 2),
+                nn.LayerNorm(input_size // 2),
+                nn.GELU(),
+                nn.Dropout(0.1),
+                nn.Linear(input_size // 2, num_bins),
+                nn.Softmax(dim=-1)
+            )
+        
+        # Bin boundaries
+        self.bin_boundaries = nn.Parameter(
+            torch.linspace(0, 1, num_bins + 1),
+            requires_grad=False
+        )
+        
+        # Learnable scaling factors for each bin
+        self.bin_scaling = nn.Parameter(torch.ones(num_bins))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Apply confidence calibration
+        Args:
+            x: Input tensor, either logits or hidden states
+        Returns:
+            Calibrated confidence scores
+        """
+        # Temperature scaling
+        if self.input_size is not None:
+            # Process high-dimensional input
+            bin_weights = self.calibration_network(x)
+            base_confidence = torch.sigmoid(x.mean(dim=-1))
+        else:
+            # Process logits directly
+            scaled_logits = x / self.temperature
+            bin_weights = F.softmax(scaled_logits, dim=-1)
+            base_confidence = bin_weights.max(dim=-1)[0]
+        
+        # Apply bin-wise calibration
+        calibrated_confidence = torch.zeros_like(base_confidence)
+        for i in range(self.num_bins):
+            bin_mask = (base_confidence >= self.bin_boundaries[i]) & (base_confidence < self.bin_boundaries[i + 1])
+            calibrated_confidence[bin_mask] = base_confidence[bin_mask] * self.bin_scaling[i]
+        
+        # Combine with bin weights if using calibration network
+        if self.input_size is not None:
+            final_confidence = (calibrated_confidence.unsqueeze(-1) * bin_weights).sum(dim=-1)
+        else:
+            final_confidence = calibrated_confidence
+        
+        return torch.clamp(final_confidence, 0, 1)

@@ -1,9 +1,0 @@
-ERROR:server:Training error: AdvancedModelTrainer.train() got an unexpected keyword argument 'train_data'
-[32mINFO[0m:     127.0.0.1:52384 - "[1mPOST /api/train HTTP/1.1[0m" [32m200 OK[0m
-INFO:server:Prediction request for model: document_processor
-ERROR:server:Prediction error: 404: Model document_processor not found
-[32mINFO[0m:     127.0.0.1:52408 - "[1mPOST /api/predict HTTP/1.1[0m" [32m200 OK[0m
-[32mINFO[0m:     Shutting down
-[32mINFO[0m:     Waiting for application shutdown.
-[32mINFO[0m:     Application shutdown complete.
-[32mINFO[0m:     Finished server process [[36m10479[0m]

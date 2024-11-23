@@ -13,7 +13,8 @@ from enterprise_ai.modules import (
     SemanticAnalyzer,
     DomainAdapter,
     MultiScaleFeatureFusion,
-    ConfidenceCalibration
+    ConfidenceCalibration,
+    DOMAIN_PATTERNS
 )
 import datetime
 import math
@@ -29,294 +30,145 @@ class EnterpriseAIModel(nn.Module):
         
         # Complete model architecture configuration
         self.architecture_config = {
-            'hidden_size': 1024,  # Base hidden size
-            'intermediate_size': 4096,  # 4x hidden size
+            'hidden_size': 1024,
+            'intermediate_size': 4096,
             'num_attention_heads': 16,
             'num_hidden_layers': 24,
             'max_position_embeddings': 512,
-            'vocab_size': 128100,  # DeBERTa-v3-large vocabulary size
+            'vocab_size': 128100,
             'attention_probs_dropout_prob': 0.1,
             'hidden_dropout_prob': 0.1,
-            'layer_norm_eps': 1e-7
+            'layer_norm_eps': 1e-7,
+            'num_heads': 32
         }
-        
-        # Update config with architecture settings
-        self.config.update(self.architecture_config)
         
         # Essential model dimensions
-        self.hidden_size = self.config['hidden_size']
-        self.intermediate_size = self.config['intermediate_size']
-        self.num_attention_heads = self.config['num_attention_heads']
+        self.hidden_size = self.architecture_config['hidden_size']
         
-        # Initialize size-dependent components
-        self.size_config = {
-            'embedding_dim': self.hidden_size,
-            'ffn_dim': self.intermediate_size,
-            'num_heads': self.num_attention_heads,
-            'dropout': 0.1,
-            'max_seq_length': 512
-        }
-        
-        # Add model-specific parameters
-        self.model_params = {
-            'num_document_classes': self.config.get('num_document_classes', 5),
-            'num_entity_types': self.config.get('num_entity_types', 8),
-            'num_domains': self.config.get('num_domains', 4),
-            'num_patterns': self.config.get('num_patterns', 100)
-        }
-        
-        # Initialize complexity analyzer with proper hidden size
-        self.complexity_analyzer = nn.Sequential(
-            nn.Linear(self.hidden_size, self.hidden_size * 2),
-            nn.LayerNorm(self.hidden_size * 2),
-            nn.GELU(),
-            nn.Dropout(0.1),
-            nn.Linear(self.hidden_size * 2, self.hidden_size),
-            nn.LayerNorm(self.hidden_size),
-            nn.Linear(self.hidden_size, 1),
-            nn.Sigmoid()
-        )
-        
-        # Initialize domain-specific components
-        self.domain_adapters = nn.ModuleDict({
-            domain: DomainAdapter(
-                hidden_size=self.hidden_size,
-                domain=domain
-            ) for domain in ['technical', 'financial', 'legal', 'medical']
-        })
-        
-        # Initialize pattern matcher
-        self.pattern_matcher = nn.Sequential(
-            nn.Linear(self.hidden_size, self.hidden_size * 2),
-            nn.LayerNorm(self.hidden_size * 2),
-            nn.GELU(),
-            nn.Dropout(0.1),
-            nn.Linear(self.hidden_size * 2, self.model_params['num_patterns']),
-            nn.Sigmoid()
-        )
-        
-        # Initialize confidence calibration
-        self.confidence_calibration = ConfidenceCalibration(
-            hidden_size=self.hidden_size,
-            num_bins=15,
-            temperature=0.7
-        )
-        
-        # Initialize base model with proper configuration
         try:
+            # Initialize base model properly
+            from transformers import AutoConfig, AutoModel
+            
+            # Create base config
+            base_config = AutoConfig.from_pretrained(
+                'microsoft/deberta-v3-large',
+                output_hidden_states=True,
+                output_attentions=True
+            )
+            
+            # Update base config with architecture settings
+            for key, value in self.architecture_config.items():
+                setattr(base_config, key, value)
+            
+            # Initialize the model with the config
             self.base_model = AutoModel.from_pretrained(
                 'microsoft/deberta-v3-large',
-                config_dict=self.architecture_config,
-                output_hidden_states=True,
-                output_attentions=True,
+                config=base_config,
                 trust_remote_code=True
             )
-        except Exception as e:
-            logger.error(f"Error loading base model: {str(e)}")
-            raise
             
-        # Initialize ensemble heads with robust error handling
-        try:
+            # Initialize tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained('microsoft/deberta-v3-large')
+            
+            # Initialize hidden state weights
+            self.hidden_state_weights = nn.Parameter(
+                torch.ones(self.architecture_config['num_hidden_layers'])
+            )
+            
+            # Initialize remaining components
+            self.document_analyzer = DocumentAnalyzer(self.architecture_config)
+            self.entity_recognizer = EntityRecognizer(self.architecture_config)
+            self.semantic_analyzer = SemanticAnalyzer(self.architecture_config)
+            
+            # Initialize feature fusion with correct dimensions
+            self.feature_fusion = nn.ModuleDict({
+                'document_fusion': MultiScaleFeatureFusion(
+                    input_size=self.hidden_size,
+                    output_size=self.hidden_size,
+                    num_heads=8
+                ),
+                'entity_fusion': MultiScaleFeatureFusion(
+                    input_size=self.hidden_size,
+                    output_size=self.hidden_size,
+                    num_heads=8
+                )
+            })
+            
+            # Initialize output layers
+            self.output_layers = nn.ModuleDict({
+                'document_classifier': DocumentClassifier(self.hidden_size, self.config.get('num_classes', 5)),
+                'entity_extractor': nn.Linear(self.hidden_size, self.config.get('num_entity_types', 5))
+            })
+            
+            # Initialize ensemble heads
             self.ensemble_heads = nn.ModuleList([
-                self._create_classifier('DocumentClassifier'),
-                self._create_classifier('FinancialClassifier'),
-                self._create_classifier('HybridClassifier')
+                DocumentClassifier(self.hidden_size, self.config.get('num_classes', 5)),
+                FinancialClassifier(self.hidden_size, self.config.get('num_classes', 5)),
+                HybridClassifier(self.hidden_size, self.config.get('num_classes', 5))
             ])
+            
+            # Initialize ensemble attention
+            self.ensemble_attention = nn.Linear(self.hidden_size, 3)
+            
+            # Move model to device
+            self.to(self.device)
+            
         except Exception as e:
-            logger.error(f"Error initializing ensemble heads: {str(e)}")
-            # Fallback to basic classifier if specialized ones fail
-            self.ensemble_heads = nn.ModuleList([
-                self._create_fallback_classifier() for _ in range(3)
-            ])
-        
-        # Specialized modules with dynamic sizing
-        self.document_analyzer = DocumentAnalyzer(config)
-        self.entity_recognizer = EntityRecognizer(config)
-        self.semantic_analyzer = SemanticAnalyzer(config)
-        
-        # Adaptive feature fusion
-        doc_fusion_input = self.hidden_size * 3  # Concatenated features
-        entity_fusion_input = self.hidden_size * 2  # Concatenated features
-        
-        # Enhanced feature fusion with cross-attention
-        self.feature_fusion = nn.ModuleDict({
-            'document_fusion': nn.Sequential(
-                nn.Linear(self.hidden_size * 3, self.hidden_size),
-                nn.LayerNorm(self.hidden_size),
-                nn.GELU(),
-                nn.Dropout(0.2),
-                nn.Linear(self.hidden_size, self.hidden_size),
-                nn.LayerNorm(self.hidden_size),
-                ResidualAttention(self.hidden_size),
-                nn.Dropout(0.1)
-            ),
-            'entity_fusion': nn.Sequential(
-                nn.Linear(self.hidden_size * 2, self.hidden_size),
-                nn.LayerNorm(self.hidden_size),
-                nn.GELU(),
-                nn.Dropout(0.2),
-                nn.Linear(self.hidden_size, self.hidden_size),
-                nn.LayerNorm(self.hidden_size),
-                ResidualAttention(self.hidden_size),
-                nn.Dropout(0.1)
-            )
-        })
-        
-        # Add attention mechanism for ensemble weighting
-        self.ensemble_attention = nn.Sequential(
-            nn.Linear(config['num_document_classes'], self.hidden_size),
-            nn.GELU(),
-            nn.Linear(self.hidden_size, 1)
-        )
-        
-        # Add hidden state weights parameter
-        self.hidden_state_weights = nn.Parameter(
-            torch.ones(self.base_model.config.num_hidden_layers + 1)
-        )
-        
-        # Add confidence boosting module
-        self.confidence_booster = nn.Sequential(
-            nn.Linear(self.hidden_size, self.hidden_size),
-            nn.LayerNorm(self.hidden_size),
-            nn.GELU(),
-            nn.Linear(self.hidden_size, config['num_document_classes'])
-        )
-        
-        # Output layers with dynamic sizing
-        self.output_layers = nn.ModuleDict({
-            'document_classifier': nn.Sequential(
-                nn.Linear(self.hidden_size, config['num_document_classes']),
-                nn.LayerNorm(config['num_document_classes'])
-            ),
-            'entity_extractor': nn.Sequential(
-                nn.Linear(self.hidden_size, config['num_entity_types']),
-                nn.LayerNorm(config['num_entity_types'])
-            )
-        })
-        
-        # Enhanced tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            'microsoft/deberta-v3-large',
-            additional_special_tokens=[
-                '[DOC_START]', '[DOC_END]',
-                '[ENTITY_START]', '[ENTITY_END]'
-            ]
-        )
-        
-        # Add financial domain pre-training
-        self.financial_embeddings = nn.Embedding(
-            num_embeddings=10000,
-            embedding_dim=self.hidden_size
-        )
-        
-        # Multi-scale feature fusion
-        self.feature_fusion = MultiScaleFeatureFusion(
-            hidden_size=self.hidden_size,  # Use self.hidden_size instead of hidden_size
-            num_scales=4,
-            num_heads=[8, 16, 32, 64]
-        )
-        
-        # Genuine multi-aspect analysis
-        self.aspect_analyzers = nn.ModuleList([
-            nn.Sequential(
-                nn.Linear(self.hidden_size, self.hidden_size),
-                nn.LayerNorm(self.hidden_size),
-                nn.GELU(),
-                nn.Linear(self.hidden_size, self.hidden_size)
-            ) for _ in range(4)  # Different aspects of document analysis
-        ])
-        
-        # Real confidence through better understanding
-        self.understanding_layer = nn.Sequential(
-            nn.Linear(self.hidden_size * 4, self.hidden_size * 2),
-            nn.LayerNorm(self.hidden_size * 2),
-            nn.GELU(),
-            nn.Linear(self.hidden_size * 2, self.config['num_document_classes'])
-        )
-        
-        self.to(self.device)
+            logger.error(f"Error initializing model: {str(e)}")
+            raise
     
-    def forward(self, inputs: Dict[str, torch.Tensor]) -> Dict[str, Any]:
-        """Main forward pass"""
+    def forward(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         try:
+            # Standardize input format
+            if isinstance(inputs, dict) and 'text' in inputs:
+                # Process raw text input
+                encoded = self.tokenizer(
+                    inputs['text'],
+                    padding=True,
+                    truncation=True,
+                    max_length=512,
+                    return_tensors='pt'
+                ).to(self.device)
+                inputs = encoded
+
             # Get base model outputs
             base_outputs = self.base_model(**inputs)
-            hidden_states = base_outputs.hidden_states
-            attentions = base_outputs.attentions
-            last_hidden = base_outputs.last_hidden_state
+            hidden_states = base_outputs.last_hidden_state  # [batch_size, seq_len, hidden_dim]
             
-            # Weighted combination of hidden states
-            weighted_states = torch.stack([
-                w * h for w, h in zip(
-                    F.softmax(self.hidden_state_weights, dim=0),
-                    hidden_states
-                )
-            ]).sum(dim=0)
+            # Get mean pooled representation with correct dimensions
+            mean_pooled = hidden_states.mean(dim=1)  # [batch_size, hidden_dim]
             
-            # Document analysis
-            doc_features = self.document_analyzer(weighted_states)
-            entity_features = self.entity_recognizer(weighted_states)
-            semantic_features = self.semantic_analyzer(weighted_states)
+            # Document classification path
+            doc_features = self.feature_fusion['document_fusion'](mean_pooled)
+            doc_logits = self.output_layers['document_classifier'](doc_features)
             
-            # Feature fusion
-            doc_combined = torch.cat([doc_features, entity_features, semantic_features], dim=-1)
-            entity_combined = torch.cat([entity_features, semantic_features], dim=-1)
+            # Entity extraction path
+            entity_features = self.feature_fusion['entity_fusion'](mean_pooled)
+            entity_logits = self.output_layers['entity_extractor'](entity_features)
             
-            fused_doc = self.feature_fusion['document_fusion'](doc_combined)
-            fused_entity = self.feature_fusion['entity_fusion'](entity_combined)
+            # Semantic analysis
+            semantic_features = self.semantic_analyzer(mean_pooled)  # [batch_size, semantic_dim]
             
-            # Ensemble predictions
-            ensemble_outputs = []
-            for head in self.ensemble_heads:
-                head_output = head(fused_doc)
-                ensemble_outputs.append(head_output)
+            # Calculate confidence scores
+            confidence_scores = torch.softmax(doc_logits, dim=-1).max(dim=-1)[0]  # [batch_size]
             
-            # Weighted ensemble combination
-            ensemble_stack = torch.stack(ensemble_outputs, dim=1)
-            ensemble_weights = F.softmax(
-                self.ensemble_attention(ensemble_stack).squeeze(-1),
-                dim=-1
-            )
-            final_logits = (ensemble_stack * ensemble_weights.unsqueeze(-1)).sum(dim=1)
-            
-            # Calculate complexity scores
-            complexity_scores = {
-                'structure': self._analyze_structure(hidden_states),
-                'semantic': self._analyze_semantics(hidden_states),
-                'technical': self._analyze_technical_content(hidden_states)
-            }
-            complexity_score = sum(complexity_scores.values()) / len(complexity_scores)
-            
-            # Final predictions
-            doc_probs = self._calculate_probabilities(final_logits, complexity_score)
-            entity_logits = self.output_layers['entity_extractor'](fused_entity)
-            entity_probs = torch.sigmoid(entity_logits)
-            
-            # Calculate confidence
-            confidence = self.calculate_confidence(final_logits, fused_doc)
-            
+            # Calculate complexity score
+            complexity_score = self.assess_document_complexity(base_outputs.hidden_states)  # [batch_size]
+
             return {
                 'document_class': {
-                    'predicted_class': doc_probs.argmax(dim=-1),
-                    'confidence': confidence,
-                    'complexity_score': complexity_score,
-                    'class_probabilities': doc_probs
+                    'logits': doc_logits,
+                    'confidence': confidence_scores,
+                    'complexity_score': complexity_score
                 },
                 'entities': {
-                    'detected_entities': entity_probs.argmax(dim=-1),
-                    'entity_probabilities': entity_probs
+                    'logits': entity_logits,
+                    'entity_probabilities': torch.sigmoid(entity_logits)
                 },
-                'metadata': {
-                    'model_type': self.model_type,
-                    'processing_timestamp': datetime.datetime.now().isoformat(),
-                    'model_version': '2.0',
-                    'confidence_boosted': True,
-                    'multi_scale_enabled': True,
-                    'enhanced_entities': True,
-                    'complexity_aware': True
-                }
+                'semantic_features': semantic_features,
+                'hidden_states': base_outputs.hidden_states
             }
-            
+
         except Exception as e:
             logger.error(f"Forward pass error: {str(e)}")
             raise
@@ -395,57 +247,55 @@ class EnterpriseAIModel(nn.Module):
                 config={'num_document_classes': 5, 'num_entity_types': 8, 'embedding_dim': 1024}
             )
     
-    def post_process_outputs(self, outputs: Dict[str, torch.Tensor]) -> Dict[str, Any]:
-        processed = {}
-        
-        if 'document_class' in outputs:
-            logits = outputs['document_class']
+    def post_process_outputs(self, outputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Post-process model outputs for API response"""
+        try:
+            processed = {}
             
-            try:
-                # Calculate complexity score
-                if 'hidden_states' in outputs:
-                    complexity_score = self.assess_document_complexity(outputs['hidden_states'])
-                else:
-                    complexity_score = torch.tensor(0.5, device=self.device)
+            # Process document classification outputs
+            if 'document_class' in outputs:
+                doc_outputs = outputs['document_class']
+                logits = doc_outputs['logits']
                 
-                # Enhanced confidence calculation
-                adjusted_probs = self.adjust_confidence(logits, complexity_score)
-                max_prob, pred_class = torch.max(adjusted_probs, dim=1)
+                # Calculate probabilities
+                probs = F.softmax(logits, dim=-1)
+                confidence = doc_outputs['confidence']
+                complexity = doc_outputs.get('complexity_score', torch.tensor(0.5))
                 
-                # Apply domain expertise boost
-                if max_prob > 0.4:  # Clear prediction
-                    confidence_boost = 1.4
-                else:  # Uncertain prediction
-                    confidence_boost = 1.2
-                    
-                processed['document_class'] = {
-                    'predicted_class': int(pred_class[0]),
-                    'confidence': float(max_prob[0] * confidence_boost),
-                    'complexity_score': float(complexity_score.item()),
-                    'class_probabilities': adjusted_probs[0].tolist()
+                processed['document_classification'] = {
+                    'probabilities': probs.tolist(),
+                    'confidence': confidence.tolist(),
+                    'complexity_score': complexity.tolist() if isinstance(complexity, torch.Tensor) else complexity
                 }
+            
+            # Process entity outputs
+            if 'entities' in outputs:
+                entity_outputs = outputs['entities']
+                entity_probs = entity_outputs['entity_probabilities']
                 
-            except Exception as e:
-                logger.error(f"Error in post-processing: {str(e)}")
-                # Fallback processing with higher base confidence
-                probs = F.softmax(logits, dim=1)
-                max_prob, pred_class = torch.max(probs, dim=1)
-                processed['document_class'] = {
-                    'predicted_class': int(pred_class[0]),
-                    'confidence': float(max_prob[0] * 1.3),  # Boosted fallback confidence
-                    'class_probabilities': probs[0].tolist(),
+                processed['entities'] = {
+                    'probabilities': entity_probs.tolist()
+                }
+            
+            # Process semantic features
+            if 'semantic_features' in outputs:
+                semantic_features = outputs['semantic_features']
+                processed['semantic_analysis'] = {
+                    'features': semantic_features.tolist()
+                }
+            
+            return processed
+            
+        except Exception as e:
+            logger.error(f"Error in post-processing: {str(e)}")
+            # Return basic processed output as fallback
+            return {
+                'document_classification': {
+                    'probabilities': outputs.get('document_class', {}).get('logits', torch.zeros(1)).softmax(dim=-1).tolist(),
+                    'confidence': 0.5,
                     'complexity_score': 0.5
                 }
-        
-        if 'entities' in outputs:
-            entity_probs = torch.sigmoid(outputs['entities'])
-            # Lower threshold for entity detection
-            processed['entities'] = {
-                'detected_entities': [i for i, p in enumerate(entity_probs[0]) if p > 0.5],  # Changed from 0.7
-                'entity_probabilities': entity_probs[0].tolist()
             }
-        
-        return processed
     
     def _enhance_prediction_confidence(self, probs):
         # Remove artificial boosting
@@ -507,23 +357,26 @@ class EnterpriseAIModel(nn.Module):
         technical_complexity = self._analyze_technical_content(hidden_states)
         return (structural_complexity + semantic_complexity + technical_complexity) / 3
     
-    def adjust_confidence(self, logits, complexity_score):
-        """Enhanced confidence calculation with domain expertise"""
-        base_probs = F.softmax(logits, dim=1)
-        
-        # Apply domain-specific boosting
-        domain_boost = torch.where(
-            base_probs > 0.3,  # Threshold for boosting
-            base_probs * 1.5,  # Boost confident predictions
-            base_probs * 0.8   # Reduce uncertain predictions
-        )
-        
-        # Apply complexity-aware scaling
-        complexity_factor = 1.0 - (complexity_score * 0.3)  # Reduced impact of complexity
-        adjusted_probs = domain_boost * complexity_factor
-        
-        # Normalize probabilities
-        return F.normalize(adjusted_probs, p=1, dim=1)
+    def adjust_confidence(self, logits: torch.Tensor, complexity_score: torch.Tensor) -> torch.Tensor:
+        """Adjust confidence scores based on complexity"""
+        try:
+            # Ensure inputs are tensors
+            if isinstance(logits, dict):
+                logits = logits.get('logits', torch.zeros(1, self.config.get('num_classes', 2)))
+            
+            # Calculate base probabilities
+            base_probs = F.softmax(logits, dim=-1)
+            
+            # Apply complexity-based scaling
+            complexity_factor = 1.0 - (complexity_score * 0.3)  # Reduce confidence for complex inputs
+            adjusted_probs = base_probs * complexity_factor
+            
+            # Normalize probabilities
+            return F.normalize(adjusted_probs, p=1, dim=-1)
+            
+        except Exception as e:
+            logger.error(f"Error adjusting confidence: {str(e)}")
+            return F.softmax(logits, dim=-1) if isinstance(logits, torch.Tensor) else torch.softmax(torch.zeros(1, self.config.get('num_classes', 2)), dim=-1)
     
     def process_input(self, text: str) -> Dict[str, torch.Tensor]:
         """Process raw text input into model-ready format"""
@@ -679,6 +532,7 @@ class EnterpriseAIModel(nn.Module):
         # Normalize probabilities
         return F.normalize(adjusted_probs, p=1, dim=-1)
 
+    
 class ResidualAttention(nn.Module):
     def __init__(self, hidden_size):
         super().__init__()
